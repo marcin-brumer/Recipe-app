@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import NavBar from "./components/NavBar";
 import Content from "./components/Content/Content";
@@ -15,20 +15,17 @@ const theme = createMuiTheme({
 });
 
 function App() {
-    const [value, setValue] = React.useState(0);
+    const [value, setValue] = useState(0);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
-    };
-    const handleChangeIndex = index => {
-        setValue(index);
     };
 
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <NavBar handleChange={handleChange} value={value} />
-            <Content value={value} handleChangeIndex={handleChangeIndex} />
+            <Content value={value} />
         </ThemeProvider>
     );
 }
