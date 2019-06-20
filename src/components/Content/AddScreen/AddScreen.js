@@ -11,7 +11,12 @@ import Fab from "@material-ui/core/Fab";
 import Chip from "@material-ui/core/Chip";
 import AddIcon from "@material-ui/icons/Add";
 import Button from "@material-ui/core/Button";
+import Snackbar from "@material-ui/core/Snackbar";
+import SnackbarContent from "@material-ui/core/SnackbarContent";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Grow from "@material-ui/core/Grow";
 import { makeStyles } from "@material-ui/styles";
+import axios from "../../../axios-recipes";
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -52,6 +57,20 @@ const useStyles = makeStyles(theme => ({
         "&:hover": {
             backgroundColor: theme.palette.accent
         }
+    },
+    buttonProgress: {
+        color: theme.palette.accent,
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        marginTop: -12,
+        marginLeft: -12
+    },
+    success: {
+        backgroundColor: theme.palette.primary.main
+    },
+    error: {
+        backgroundColor: theme.palette.error.dark
     }
 }));
 
@@ -63,6 +82,9 @@ const AddScreen = props => {
     const [ingredientName, setIngredientName] = useState("");
     const [ingredients, setIngredients] = useState([]);
     const [labelWidth, setLabelWidth] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [snackbarStatus, setSnackbarStatus] = useState(false);
+    const [snackbarType, setSnackbarType] = useState("success");
 
     const changeName = event => setName(event.target.value);
     const changeTime = event => setTime(event.target.value);
@@ -85,10 +107,43 @@ const AddScreen = props => {
 
     const classes = useStyles();
 
+    const resetForm = () => {
+        setName("");
+        setTime("");
+        setIngredients([]);
+    };
+
+    const addRecipe = event => {
+        event.preventDefault();
+        if (name !== "" && time !== "" && ingredients.length > 0) {
+            setLoading(true);
+            const recipe = {
+                name: name,
+                time: time,
+                ingredients: ingredients,
+                date: new Date()
+            };
+            axios
+                .post("/recipes.json", recipe)
+                .then(res => {
+                    setLoading(false);
+                    resetForm();
+                    setSnackbarType("success");
+                    setSnackbarStatus(true);
+                })
+                .catch(err => {
+                    setLoading(false);
+                    resetForm();
+                    setSnackbarType("error");
+                    setSnackbarStatus(true);
+                });
+        }
+    };
+
     return (
         <>
-            <Paper className={classes.container}>
-                <form>
+            <form>
+                <Paper className={classes.container}>
                     <TextField
                         id="name"
                         label="Nazwa"
@@ -97,11 +152,13 @@ const AddScreen = props => {
                         onChange={changeName}
                         className={classes.textField}
                         fullWidth
+                        required
                     />
                     <FormControl
                         variant="outlined"
                         fullWidth
                         className={classes.textField}
+                        required
                     >
                         <InputLabel ref={inputLabel}>
                             Czas przygotowania [min]
@@ -155,11 +212,45 @@ const AddScreen = props => {
                             />
                         ))}
                     </Box>
-                </form>
-            </Paper>
-            <Button variant="contained" className={classes.button}>
-                Dodaj
-            </Button>
+                </Paper>
+                <Button
+                    type="submit"
+                    variant="contained"
+                    className={classes.button}
+                    onClick={addRecipe}
+                    disabled={loading}
+                >
+                    Dodaj
+                    {loading && (
+                        <CircularProgress
+                            size={24}
+                            className={classes.buttonProgress}
+                        />
+                    )}
+                </Button>
+            </form>
+            <Snackbar
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center"
+                }}
+                className={classes[snackbarType]}
+                open={snackbarStatus}
+                autoHideDuration={3000}
+                onClose={() => setSnackbarStatus(false)}
+            >
+                <SnackbarContent
+                    message={
+                        snackbarType === "success" ? (
+                            <span>Dodano przepis</span>
+                        ) : (
+                            <span>Wystąpił błąd</span>
+                        )
+                    }
+                    className={classes[snackbarType]}
+                    onClose={() => setSnackbarStatus(false)}
+                />
+            </Snackbar>
         </>
     );
 };
