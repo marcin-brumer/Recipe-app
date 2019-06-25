@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import DeleteModal from "./DeleteModal";
 import Paper from "@material-ui/core/Paper";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -15,7 +16,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import axios from "../../../axios-recipes";
+import firebase from "../../../firebaseConfig";
 import { makeStyles } from "@material-ui/styles";
 
 const useStyles = makeStyles(theme => ({
@@ -44,66 +45,96 @@ const getRandomIcon = () =>
 const BrowseScreen = props => {
     const [recipes, setRecipes] = useState({});
     const [loading, setLoading] = useState(true);
+    const [activeRecipeId, setActiveRecipeId] = useState("");
+    const [deleteModal, setDeleteModal] = useState(false);
 
-    const updateRecipes = async () => {
+    const updateRecipes = () => {
         setLoading(true);
-        const response = await axios.get("/recipes.json");
-        const recipes = response.data;
-        setRecipes(recipes);
-        setLoading(false);
+        const db = firebase.firestore();
+        const recipes = [];
+        db.collection("recipes")
+            .get()
+            .then(querySnapshot =>
+                querySnapshot.forEach(el => {
+                    recipes.push({ id: el.id, data: el.data() });
+                })
+            )
+            .then(() => setRecipes(recipes))
+            .then(() => setLoading(false));
     };
 
     useEffect(() => {
         updateRecipes();
     }, []);
 
+    const deleteRecipe = async () => {
+        const db = firebase.firestore();
+        db.collection("recipes")
+            .doc(activeRecipeId)
+            .delete()
+            .then(() => {
+                setDeleteModal(false);
+                updateRecipes();
+            });
+    };
+
     const classes = useStyles();
 
     return loading ? (
         <CircularProgress className={classes.progress} />
     ) : (
-        <Paper>
-            <List>
-                {Object.keys(recipes).map(key => {
-                    return (
-                        <ListItem key={key}>
-                            <ListItemAvatar>
-                                <Avatar>{getRandomIcon()}</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary={recipes[key].name}
-                                secondary={`Czas - ${recipes[key].time} min`}
-                            />
-                            <ListItemSecondaryAction>
-                                <IconButton
-                                    edge="end"
-                                    aria-label="Show"
-                                    onClick={() => console.log("test1")}
-                                >
-                                    <SearchIcon />
-                                </IconButton>
-                                <IconButton
-                                    edge="end"
-                                    aria-label="Edit"
-                                    onClick={() => console.log("test2")}
-                                    className={classes.editButton}
-                                >
-                                    <EditIcon />
-                                </IconButton>
-                                <IconButton
-                                    edge="end"
-                                    aria-label="Delete"
-                                    onClick={() => console.log("test3")}
-                                    className={classes.deleteButton}
-                                >
-                                    <DeleteIcon />
-                                </IconButton>
-                            </ListItemSecondaryAction>
-                        </ListItem>
-                    );
-                })}
-            </List>
-        </Paper>
+        <>
+            <Paper>
+                <List>
+                    {recipes.map(recipe => {
+                        return (
+                            <ListItem key={recipe.id}>
+                                <ListItemAvatar>
+                                    <Avatar>{getRandomIcon()}</Avatar>
+                                </ListItemAvatar>
+                                <ListItemText
+                                    primary={recipe.data.name}
+                                    secondary={`Czas - ${recipe.data.time} min`}
+                                />
+                                <ListItemSecondaryAction>
+                                    <IconButton
+                                        edge="end"
+                                        aria-label="Show"
+                                        onClick={() => console.log("test1")}
+                                    >
+                                        <SearchIcon />
+                                    </IconButton>
+                                    <IconButton
+                                        edge="end"
+                                        aria-label="Edit"
+                                        onClick={() => console.log("test2")}
+                                        className={classes.editButton}
+                                    >
+                                        <EditIcon />
+                                    </IconButton>
+                                    <IconButton
+                                        edge="end"
+                                        aria-label="Delete"
+                                        onClick={e => {
+                                            setActiveRecipeId(recipe.id);
+                                            setDeleteModal(true);
+                                        }}
+                                        className={classes.deleteButton}
+                                    >
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </ListItemSecondaryAction>
+                            </ListItem>
+                        );
+                    })}
+                </List>
+            </Paper>
+            <DeleteModal
+                open={deleteModal}
+                handleClose={() => setDeleteModal(false)}
+                deleteRecipe={deleteRecipe}
+            />
+        </>
     );
 };
 

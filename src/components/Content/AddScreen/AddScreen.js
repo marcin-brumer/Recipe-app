@@ -15,7 +15,7 @@ import Snackbar from "@material-ui/core/Snackbar";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { makeStyles } from "@material-ui/styles";
-import axios from "../../../axios-recipes";
+import firebase from "../../../firebaseConfig";
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -122,8 +122,9 @@ const AddScreen = props => {
                 ingredients: ingredients,
                 date: new Date()
             };
-            axios
-                .post("/recipes.json", recipe)
+            const db = firebase.firestore();
+            db.collection("recipes")
+                .add(recipe)
                 .then(res => {
                     setLoading(false);
                     resetForm();
