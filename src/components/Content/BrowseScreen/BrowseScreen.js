@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import DeleteModal from "./DeleteModal";
+import EditModal from "./EditModal";
 import Paper from "@material-ui/core/Paper";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -16,6 +17,8 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Snackbar from "@material-ui/core/Snackbar";
+import SnackbarContent from "@material-ui/core/SnackbarContent";
 import firebase from "../../../firebaseConfig";
 import { makeStyles } from "@material-ui/styles";
 
@@ -29,6 +32,16 @@ const useStyles = makeStyles(theme => ({
     progress: {
         position: "absolute",
         left: "calc(50vw - 20px)"
+    },
+    text: {
+        maxWidth: "50%",
+        wordBreak: "break-word"
+    },
+    success: {
+        backgroundColor: theme.palette.primary.main
+    },
+    error: {
+        backgroundColor: theme.palette.error.dark
     }
 }));
 
@@ -45,8 +58,15 @@ const getRandomIcon = () =>
 const BrowseScreen = props => {
     const [recipes, setRecipes] = useState({});
     const [loading, setLoading] = useState(true);
+    const [editLoader, setEditLoader] = useState(false);
     const [activeRecipeId, setActiveRecipeId] = useState("");
     const [deleteModal, setDeleteModal] = useState(false);
+    const [editModal, setEditModal] = useState(false);
+    const [activeName, setActiveName] = useState("");
+    const [activeTime, setActiveTime] = useState(null);
+    const [activeIngredients, setActiveIngredients] = useState([]);
+    const [snackbarStatus, setSnackbarStatus] = useState(false);
+    const [snackbarType, setSnackbarType] = useState("success");
 
     const updateRecipes = () => {
         setLoading(true);
@@ -67,7 +87,7 @@ const BrowseScreen = props => {
         updateRecipes();
     }, []);
 
-    const deleteRecipe = async () => {
+    const deleteRecipe = () => {
         const db = firebase.firestore();
         db.collection("recipes")
             .doc(activeRecipeId)
@@ -76,6 +96,41 @@ const BrowseScreen = props => {
                 setDeleteModal(false);
                 updateRecipes();
             });
+    };
+
+    const saveChanges = event => {
+        event.preventDefault();
+        if (
+            activeName !== "" &&
+            activeTime !== "" &&
+            activeIngredients.length > 0
+        ) {
+            setEditLoader(true);
+            const recipe = {
+                name: activeName,
+                time: activeTime,
+                ingredients: activeIngredients,
+                date: new Date()
+            };
+            const db = firebase.firestore();
+            db.collection("recipes")
+                .doc(activeRecipeId)
+                .update(recipe)
+                .then(res => {
+                    setEditLoader(false);
+                    setEditModal(false);
+                    updateRecipes();
+                    setSnackbarType("success");
+                    setSnackbarStatus(true);
+                })
+                .catch(err => {
+                    setEditLoader(false);
+                    setEditModal(false);
+                    updateRecipes();
+                    setSnackbarType("error");
+                    setSnackbarStatus(true);
+                });
+        }
     };
 
     const classes = useStyles();
@@ -95,6 +150,7 @@ const BrowseScreen = props => {
                                 <ListItemText
                                     primary={recipe.data.name}
                                     secondary={`Czas - ${recipe.data.time} min`}
+                                    className={classes.text}
                                 />
                                 <ListItemSecondaryAction>
                                     <IconButton
@@ -107,7 +163,15 @@ const BrowseScreen = props => {
                                     <IconButton
                                         edge="end"
                                         aria-label="Edit"
-                                        onClick={() => console.log("test2")}
+                                        onClick={() => {
+                                            setActiveRecipeId(recipe.id);
+                                            setActiveName(recipe.data.name);
+                                            setActiveTime(recipe.data.time);
+                                            setActiveIngredients(
+                                                recipe.data.ingredients
+                                            );
+                                            setEditModal(true);
+                                        }}
                                         className={classes.editButton}
                                     >
                                         <EditIcon />
@@ -134,6 +198,40 @@ const BrowseScreen = props => {
                 handleClose={() => setDeleteModal(false)}
                 deleteRecipe={deleteRecipe}
             />
+            <EditModal
+                open={editModal}
+                handleClose={() => setEditModal(false)}
+                activeName={activeName}
+                setActiveName={setActiveName}
+                activeTime={activeTime}
+                setActiveTime={setActiveTime}
+                activeIngredients={activeIngredients}
+                setActiveIngredients={setActiveIngredients}
+                saveChanges={saveChanges}
+                loading={editLoader}
+            />
+            <Snackbar
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center"
+                }}
+                className={classes[snackbarType]}
+                open={snackbarStatus}
+                autoHideDuration={2000}
+                onClose={() => setSnackbarStatus(false)}
+            >
+                <SnackbarContent
+                    message={
+                        snackbarType === "success" ? (
+                            <span>Zapisano zmiany</span>
+                        ) : (
+                            <span>Wystąpił błąd</span>
+                        )
+                    }
+                    className={classes[snackbarType]}
+                    onClose={() => setSnackbarStatus(false)}
+                />
+            </Snackbar>
         </>
     );
 };
