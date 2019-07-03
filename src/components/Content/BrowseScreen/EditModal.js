@@ -72,14 +72,10 @@ const useStyles = makeStyles(theme => ({
 
 const EditModal = props => {
     const {
-        activeName,
-        setActiveName,
-        activeTime,
-        setActiveTime,
+        activeRecipe,
+        setActiveRecipe,
         open,
         handleClose,
-        activeIngredients,
-        setActiveIngredients,
         loading,
         saveChanges
     } = props;
@@ -89,17 +85,29 @@ const EditModal = props => {
     const changeIngredientName = event => setIngredientName(event.target.value);
     const addIngredient = () => {
         if (ingredientName !== "") {
-            setActiveIngredients([...activeIngredients, ingredientName]);
+            const updatedIngredients = [
+                ...activeRecipe.ingredients,
+                ingredientName
+            ];
+            setActiveRecipe({
+                ...activeRecipe,
+                ingredients: updatedIngredients
+            });
             setIngredientName("");
         }
     };
     const deleteIngredient = ingredientToDelete => () => {
-        setActiveIngredients(ingredients =>
-            ingredients.filter(ingredient => ingredient !== ingredientToDelete)
+        const updatedIngredients = [...activeRecipe.ingredients].filter(
+            ingredient => ingredient !== ingredientToDelete
         );
+        setActiveRecipe({
+            ...activeRecipe,
+            ingredients: updatedIngredients
+        });
     };
 
     const classes = useStyles();
+
     return (
         <Dialog open={open} onClose={handleClose}>
             <DialogTitle>
@@ -121,8 +129,13 @@ const EditModal = props => {
                         className={classes.textField}
                         fullWidth
                         required
-                        value={activeName}
-                        onChange={event => setActiveName(event.target.value)}
+                        value={activeRecipe.name}
+                        onChange={event =>
+                            activeRecipe({
+                                ...activeRecipe,
+                                name: event.target.value
+                            })
+                        }
                         margin="dense"
                     />
                 </form>
@@ -135,8 +148,13 @@ const EditModal = props => {
                 >
                     <InputLabel>Czas [min]</InputLabel>
                     <Select
-                        value={activeTime}
-                        onChange={event => setActiveTime(event.target.value)}
+                        value={activeRecipe.time}
+                        onChange={event =>
+                            activeRecipe({
+                                ...activeRecipe,
+                                time: event.target.value
+                            })
+                        }
                         input={<OutlinedInput labelWidth={85} id="time" />}
                     >
                         <MenuItem value={15}>15</MenuItem>
@@ -170,15 +188,16 @@ const EditModal = props => {
                     </Fab>
                 </Box>
                 <Box className={classes.ingredientsList}>
-                    {activeIngredients.map(ingredient => (
-                        <Chip
-                            key={ingredient}
-                            label={ingredient}
-                            className={classes.ingredient}
-                            onDelete={deleteIngredient(ingredient)}
-                            size="small"
-                        />
-                    ))}
+                    {activeRecipe !== "" &&
+                        activeRecipe.ingredients.map(ingredient => (
+                            <Chip
+                                key={ingredient}
+                                label={ingredient}
+                                className={classes.ingredient}
+                                onDelete={deleteIngredient(ingredient)}
+                                size="small"
+                            />
+                        ))}
                 </Box>
                 <Button
                     type="submit"

@@ -62,9 +62,7 @@ const BrowseScreen = props => {
     const [activeRecipeId, setActiveRecipeId] = useState("");
     const [deleteModal, setDeleteModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
-    const [activeName, setActiveName] = useState("");
-    const [activeTime, setActiveTime] = useState(null);
-    const [activeIngredients, setActiveIngredients] = useState([]);
+    const [activeRecipe, setActiveRecipe] = useState("");
     const [snackbarStatus, setSnackbarStatus] = useState(false);
     const [snackbarType, setSnackbarType] = useState("success");
 
@@ -101,15 +99,15 @@ const BrowseScreen = props => {
     const saveChanges = event => {
         event.preventDefault();
         if (
-            activeName !== "" &&
-            activeTime !== "" &&
-            activeIngredients.length > 0
+            activeRecipe.name !== "" &&
+            activeRecipe.time !== "" &&
+            activeRecipe.ingredients.length > 0
         ) {
             setEditLoader(true);
             const recipe = {
-                name: activeName,
-                time: activeTime,
-                ingredients: activeIngredients,
+                name: activeRecipe.name,
+                time: activeRecipe.time,
+                ingredients: activeRecipe.ingredients,
                 date: new Date()
             };
             const db = firebase.firestore();
@@ -165,11 +163,7 @@ const BrowseScreen = props => {
                                         aria-label="Edit"
                                         onClick={() => {
                                             setActiveRecipeId(recipe.id);
-                                            setActiveName(recipe.data.name);
-                                            setActiveTime(recipe.data.time);
-                                            setActiveIngredients(
-                                                recipe.data.ingredients
-                                            );
+                                            setActiveRecipe(recipe.data);
                                             setEditModal(true);
                                         }}
                                         className={classes.editButton}
@@ -201,14 +195,10 @@ const BrowseScreen = props => {
             <EditModal
                 open={editModal}
                 handleClose={() => setEditModal(false)}
-                activeName={activeName}
-                setActiveName={setActiveName}
-                activeTime={activeTime}
-                setActiveTime={setActiveTime}
-                activeIngredients={activeIngredients}
-                setActiveIngredients={setActiveIngredients}
                 saveChanges={saveChanges}
                 loading={editLoader}
+                activeRecipe={activeRecipe}
+                setActiveRecipe={setActiveRecipe}
             />
             <Snackbar
                 anchorOrigin={{
