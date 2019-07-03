@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import DeleteModal from "./DeleteModal";
 import EditModal from "./EditModal";
+import PreviewModal from "./PreviewModal";
 import Paper from "@material-ui/core/Paper";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -62,6 +63,7 @@ const BrowseScreen = props => {
     const [activeRecipeId, setActiveRecipeId] = useState("");
     const [deleteModal, setDeleteModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
+    const [previewModal, setPreviewModal] = useState(false);
     const [activeRecipe, setActiveRecipe] = useState("");
     const [snackbarStatus, setSnackbarStatus] = useState(false);
     const [snackbarType, setSnackbarType] = useState("success");
@@ -153,8 +155,11 @@ const BrowseScreen = props => {
                                 <ListItemSecondaryAction>
                                     <IconButton
                                         edge="end"
-                                        aria-label="Show"
-                                        onClick={() => console.log("test1")}
+                                        aria-label="Preview"
+                                        onClick={() => {
+                                            setActiveRecipe(recipe.data);
+                                            setPreviewModal(true);
+                                        }}
                                     >
                                         <SearchIcon />
                                     </IconButton>
@@ -199,6 +204,11 @@ const BrowseScreen = props => {
                 loading={editLoader}
                 activeRecipe={activeRecipe}
                 setActiveRecipe={setActiveRecipe}
+            />
+            <PreviewModal
+                open={previewModal}
+                handleClose={() => setPreviewModal(false)}
+                activeRecipe={activeRecipe}
             />
             <Snackbar
                 anchorOrigin={{

@@ -65,8 +65,8 @@ const useStyles = makeStyles(theme => ({
     },
     closeButton: {
         position: "absolute",
-        right: "8px",
-        top: "8px"
+        right: "6px",
+        top: "6px"
     }
 }));
 
@@ -126,12 +126,11 @@ const EditModal = props => {
                         id="name"
                         label="Nazwa"
                         variant="outlined"
-                        className={classes.textField}
                         fullWidth
                         required
                         value={activeRecipe.name}
                         onChange={event =>
-                            activeRecipe({
+                            setActiveRecipe({
                                 ...activeRecipe,
                                 name: event.target.value
                             })
@@ -142,7 +141,6 @@ const EditModal = props => {
                 <FormControl
                     variant="outlined"
                     fullWidth
-                    className={classes.textField}
                     required
                     margin="dense"
                 >
@@ -150,7 +148,7 @@ const EditModal = props => {
                     <Select
                         value={activeRecipe.time}
                         onChange={event =>
-                            activeRecipe({
+                            setActiveRecipe({
                                 ...activeRecipe,
                                 time: event.target.value
                             })
