@@ -57,7 +57,8 @@ const getRandomIcon = () =>
     iconsArray[Math.floor(Math.random() * iconsArray.length)];
 
 const BrowseScreen = props => {
-    const [recipes, setRecipes] = useState({});
+    const { recipes, getRecipes } = props;
+
     const [loading, setLoading] = useState(true);
     const [editLoader, setEditLoader] = useState(false);
     const [activeRecipeId, setActiveRecipeId] = useState("");
@@ -70,21 +71,12 @@ const BrowseScreen = props => {
 
     const updateRecipes = () => {
         setLoading(true);
-        const db = firebase.firestore();
-        const recipes = [];
-        db.collection("recipes")
-            .get()
-            .then(querySnapshot =>
-                querySnapshot.forEach(el => {
-                    recipes.push({ id: el.id, data: el.data() });
-                })
-            )
-            .then(() => setRecipes(recipes))
-            .then(() => setLoading(false));
+        getRecipes().then(() => setLoading(false));
     };
 
     useEffect(() => {
         updateRecipes();
+        // eslint-disable-next-line
     }, []);
 
     const deleteRecipe = () => {
