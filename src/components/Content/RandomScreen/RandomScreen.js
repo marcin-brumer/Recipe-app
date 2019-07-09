@@ -70,6 +70,7 @@ const RandomScreen = props => {
     const [ingredients, setIngredients] = useState([]);
     const [labelWidth, setLabelWidth] = useState(0);
     const [screenState, setScreenState] = useState("ready");
+    const [randomRecipe, setRandomRecipe] = useState("");
 
     const updateRecipes = () => {
         setScreenState("loading");
@@ -96,30 +97,88 @@ const RandomScreen = props => {
         );
     };
 
+    const filterRecipesByTime = recipe => recipe.data.time <= time;
+
+    const filterRecipesByIngredients = recipe =>
+        recipe.data.ingredients.some(ingredient =>
+            ingredients.includes(ingredient)
+        );
+
+    const getRandomElement = array =>
+        array[Math.floor(Math.random() * array.length)];
+
     const getRandomRecipe = event => {
         event.preventDefault();
-        if (ingredients === []) {
-            const result = recipes.filter(recipe => {
-                return recipe.data.time <= time;
-            });
+        setScreenState("loading");
+        let resultArray;
+        if (ingredients.length === 0) {
+            resultArray = recipes.filter(filterRecipesByTime);
+        } else if (time === "") {
+            resultArray = recipes.filter(filterRecipesByIngredients);
+        } else {
+            resultArray = recipes
+                .filter(filterRecipesByTime)
+                .filter(filterRecipesByIngredients);
         }
-        if (time === "") {
-            const result = recipes.filter(recipe => {
-                return recipe.data.ingredients;
-            });
-        }
+        const result = getRandomElement(resultArray);
+        setRandomRecipe(result);
+        setScreenState("result");
     };
 
     const classes = useStyles();
 
-    console.log(time);
     const renderScreen = () => {
         switch (screenState) {
             case "loading": {
                 return <CircularProgress className={classes.progress} />;
             }
             case "result": {
-                return <div />;
+                return (
+                    <form>
+                        <Paper className={classes.container}>
+                            <TextField
+                                id="name"
+                                label="Nazwa"
+                                fullWidth
+                                value={randomRecipe.data.name}
+                                InputProps={{
+                                    readOnly: true
+                                }}
+                                className={classes.textField}
+                            />
+                            <TextField
+                                id="time"
+                                label="Czas przygotowania [min]"
+                                fullWidth
+                                value={randomRecipe.data.time}
+                                InputProps={{
+                                    readOnly: true
+                                }}
+                                className={classes.textField}
+                            />
+                            <Box className={classes.ingredientsList}>
+                                {randomRecipe !== "" &&
+                                    randomRecipe.data.ingredients.map(
+                                        ingredient => (
+                                            <Chip
+                                                key={ingredient}
+                                                label={ingredient}
+                                                className={classes.ingredient}
+                                            />
+                                        )
+                                    )}
+                            </Box>
+                        </Paper>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            className={classes.button}
+                            onClick={getRandomRecipe}
+                        >
+                            Losuj
+                        </Button>
+                    </form>
+                );
             }
             default: {
                 return (
