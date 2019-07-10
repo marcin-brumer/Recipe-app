@@ -16,7 +16,6 @@ import FastfoodIcon from "@material-ui/icons/Fastfood";
 import PizzaIcon from "@material-ui/icons/LocalPizza";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
-import SearchIcon from "@material-ui/icons/Search";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Snackbar from "@material-ui/core/Snackbar";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
@@ -135,7 +134,13 @@ const BrowseScreen = props => {
                 <List>
                     {recipes.map(recipe => {
                         return (
-                            <ListItem key={recipe.id}>
+                            <ListItem
+                                key={recipe.id}
+                                onClick={() => {
+                                    setActiveRecipe(recipe.data);
+                                    setPreviewModal(true);
+                                }}
+                            >
                                 <ListItemAvatar>
                                     <Avatar>{getRandomIcon()}</Avatar>
                                 </ListItemAvatar>
@@ -147,18 +152,9 @@ const BrowseScreen = props => {
                                 <ListItemSecondaryAction>
                                     <IconButton
                                         edge="end"
-                                        aria-label="Preview"
-                                        onClick={() => {
-                                            setActiveRecipe(recipe.data);
-                                            setPreviewModal(true);
-                                        }}
-                                    >
-                                        <SearchIcon />
-                                    </IconButton>
-                                    <IconButton
-                                        edge="end"
                                         aria-label="Edit"
-                                        onClick={() => {
+                                        onClick={event => {
+                                            event.stopPropagation();
                                             setActiveRecipeId(recipe.id);
                                             setActiveRecipe(recipe.data);
                                             setEditModal(true);
@@ -170,7 +166,8 @@ const BrowseScreen = props => {
                                     <IconButton
                                         edge="end"
                                         aria-label="Delete"
-                                        onClick={e => {
+                                        onClick={event => {
+                                            event.stopPropagation();
                                             setActiveRecipeId(recipe.id);
                                             setDeleteModal(true);
                                         }}
