@@ -12,6 +12,7 @@ import Chip from "@material-ui/core/Chip";
 import AddIcon from "@material-ui/icons/Add";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/styles";
 
 const useStyles = makeStyles(theme => ({
@@ -63,12 +64,15 @@ const useStyles = makeStyles(theme => ({
 const RandomScreen = props => {
     const { recipes, getRecipes } = props;
 
-    const inputLabel = useRef(null);
+    const timeLabel = useRef(null);
+    const categoryLabel = useRef(null);
 
     const [time, setTime] = useState("");
     const [ingredientName, setIngredientName] = useState("");
     const [ingredients, setIngredients] = useState([]);
-    const [labelWidth, setLabelWidth] = useState(0);
+    const [category, setCategory] = useState("");
+    const [timeLabelWidth, setTimeLabelWidth] = useState(0);
+    const [categoryLabelWidth, setCategoryLabelWidth] = useState(0);
     const [screenState, setScreenState] = useState("ready");
     const [randomRecipe, setRandomRecipe] = useState("");
 
@@ -79,11 +83,13 @@ const RandomScreen = props => {
 
     useEffect(() => {
         updateRecipes();
-        setLabelWidth(inputLabel.current.offsetWidth);
+        setTimeLabelWidth(timeLabel.current.offsetWidth);
+        setCategoryLabelWidth(categoryLabel.current.offsetWidth);
         // eslint-disable-next-line
     }, []);
 
     const changeTime = event => setTime(event.target.value);
+    const changeCategory = event => setCategory(event.target.value);
     const changeIngredientName = event => setIngredientName(event.target.value);
     const addIngredient = () => {
         if (ingredientName !== "") {
@@ -99,10 +105,16 @@ const RandomScreen = props => {
 
     const filterRecipesByTime = recipe => recipe.data.time <= time;
 
-    const filterRecipesByIngredients = recipe =>
-        recipe.data.ingredients.some(ingredient =>
-            ingredients.includes(ingredient)
+    const filterRecipesByIngredients = recipe => {
+        const formatedIngredients = ingredients.map(ingredient =>
+            ingredient.toLowerCase()
         );
+        return recipe.data.ingredients.some(ingredient =>
+            formatedIngredients.includes(ingredient.toLowerCase())
+        );
+    };
+
+    const filterByCategory = recipe => recipe.data.category === category;
 
     const getRandomElement = array =>
         array[Math.floor(Math.random() * array.length)];
@@ -110,15 +122,15 @@ const RandomScreen = props => {
     const getRandomRecipe = event => {
         event.preventDefault();
         setScreenState("loading");
-        let resultArray;
-        if (ingredients.length === 0) {
-            resultArray = recipes.filter(filterRecipesByTime);
-        } else if (time === "") {
-            resultArray = recipes.filter(filterRecipesByIngredients);
-        } else {
-            resultArray = recipes
-                .filter(filterRecipesByTime)
-                .filter(filterRecipesByIngredients);
+        let resultArray = recipes;
+        if (ingredients.length > 0) {
+            resultArray = resultArray.filter(filterRecipesByIngredients);
+        }
+        if (time !== "") {
+            resultArray = resultArray.filter(filterRecipesByTime);
+        }
+        if (category !== "") {
+            resultArray = resultArray.filter(filterByCategory);
         }
         const result = getRandomElement(resultArray);
         setRandomRecipe(result);
@@ -133,7 +145,7 @@ const RandomScreen = props => {
                 return <CircularProgress className={classes.progress} />;
             }
             case "result": {
-                return (
+                return randomRecipe ? (
                     <form>
                         <Paper className={classes.container}>
                             <TextField
@@ -178,6 +190,22 @@ const RandomScreen = props => {
                             Losuj
                         </Button>
                     </form>
+                ) : (
+                    <>
+                        <Paper className={classes.container}>
+                            <Typography>
+                                Brak przepisu spełniającego wymagania
+                            </Typography>
+                        </Paper>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            className={classes.button}
+                            onClick={() => setScreenState("ready")}
+                        >
+                            Zmień wymagania
+                        </Button>
+                    </>
                 );
             }
             default: {
@@ -189,7 +217,7 @@ const RandomScreen = props => {
                                 fullWidth
                                 className={classes.textField}
                             >
-                                <InputLabel ref={inputLabel}>
+                                <InputLabel ref={timeLabel}>
                                     Max czas przygotowania [min]
                                 </InputLabel>
                                 <Select
@@ -197,7 +225,7 @@ const RandomScreen = props => {
                                     onChange={changeTime}
                                     input={
                                         <OutlinedInput
-                                            labelWidth={labelWidth}
+                                            labelWidth={timeLabelWidth}
                                             id="time"
                                         />
                                     }
@@ -210,6 +238,34 @@ const RandomScreen = props => {
                                     <MenuItem value={90}>90</MenuItem>
                                     <MenuItem value={105}>105</MenuItem>
                                     <MenuItem value={120}>120</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <FormControl
+                                variant="outlined"
+                                fullWidth
+                                className={classes.textField}
+                            >
+                                <InputLabel ref={categoryLabel}>
+                                    Kategoria
+                                </InputLabel>
+                                <Select
+                                    value={category}
+                                    onChange={changeCategory}
+                                    input={
+                                        <OutlinedInput
+                                            labelWidth={categoryLabelWidth}
+                                            id="category"
+                                        />
+                                    }
+                                >
+                                    <MenuItem value={"Obiad"}>Obiad</MenuItem>
+                                    <MenuItem value={"Sałatka"}>
+                                        Sałatka
+                                    </MenuItem>
+                                    <MenuItem value={"Deser"}>Deser</MenuItem>
+                                    <MenuItem value={"Dla dziecka"}>
+                                        Dla dziecka
+                                    </MenuItem>
                                 </Select>
                             </FormControl>
                             <Box className={classes.addIngredients}>

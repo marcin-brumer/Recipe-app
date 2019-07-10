@@ -100,6 +100,7 @@ const BrowseScreen = props => {
             const recipe = {
                 name: activeRecipe.name,
                 time: activeRecipe.time,
+                category: activeRecipe.category,
                 ingredients: activeRecipe.ingredients,
                 date: new Date()
             };

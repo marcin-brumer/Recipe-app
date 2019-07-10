@@ -74,19 +74,23 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const AddScreen = props => {
-    const inputLabel = useRef(null);
+    const timeLabel = useRef(null);
+    const categoryLabel = useRef(null);
 
     const [name, setName] = useState("");
     const [time, setTime] = useState("");
+    const [category, setCategory] = useState("");
     const [ingredientName, setIngredientName] = useState("");
     const [ingredients, setIngredients] = useState([]);
-    const [labelWidth, setLabelWidth] = useState(0);
+    const [timeLabelWidth, setTimeLabelWidth] = useState(0);
+    const [categoryLabelWidth, setCategoryLabelWidth] = useState(0);
     const [loading, setLoading] = useState(false);
     const [snackbarStatus, setSnackbarStatus] = useState(false);
     const [snackbarType, setSnackbarType] = useState("success");
 
     const changeName = event => setName(event.target.value);
     const changeTime = event => setTime(event.target.value);
+    const changeCategory = event => setCategory(event.target.value);
     const changeIngredientName = event => setIngredientName(event.target.value);
     const addIngredient = () => {
         if (ingredientName !== "") {
@@ -101,7 +105,8 @@ const AddScreen = props => {
     };
 
     useEffect(() => {
-        setLabelWidth(inputLabel.current.offsetWidth);
+        setTimeLabelWidth(timeLabel.current.offsetWidth);
+        setCategoryLabelWidth(categoryLabel.current.offsetWidth);
     }, []);
 
     const classes = useStyles();
@@ -114,11 +119,17 @@ const AddScreen = props => {
 
     const addRecipe = event => {
         event.preventDefault();
-        if (name !== "" && time !== "" && ingredients.length > 0) {
+        if (
+            name !== "" &&
+            time !== "" &&
+            category !== "" &&
+            ingredients.length > 0
+        ) {
             setLoading(true);
             const recipe = {
                 name: name,
                 time: time,
+                category: category,
                 ingredients: ingredients,
                 date: new Date()
             };
@@ -160,7 +171,7 @@ const AddScreen = props => {
                         className={classes.textField}
                         required
                     >
-                        <InputLabel ref={inputLabel}>
+                        <InputLabel ref={timeLabel}>
                             Czas przygotowania [min]
                         </InputLabel>
                         <Select
@@ -168,7 +179,7 @@ const AddScreen = props => {
                             onChange={changeTime}
                             input={
                                 <OutlinedInput
-                                    labelWidth={labelWidth}
+                                    labelWidth={timeLabelWidth}
                                     id="time"
                                 />
                             }
@@ -181,6 +192,31 @@ const AddScreen = props => {
                             <MenuItem value={90}>90</MenuItem>
                             <MenuItem value={105}>105</MenuItem>
                             <MenuItem value={120}>120</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl
+                        variant="outlined"
+                        fullWidth
+                        className={classes.textField}
+                        required
+                    >
+                        <InputLabel ref={categoryLabel}>Kategoria</InputLabel>
+                        <Select
+                            value={category}
+                            onChange={changeCategory}
+                            input={
+                                <OutlinedInput
+                                    labelWidth={categoryLabelWidth}
+                                    id="time"
+                                />
+                            }
+                        >
+                            <MenuItem value={"Obiad"}>Obiad</MenuItem>
+                            <MenuItem value={"Sałatka"}>Sałatka</MenuItem>
+                            <MenuItem value={"Deser"}>Deser</MenuItem>
+                            <MenuItem value={"Dla dziecka"}>
+                                Dla dziecka
+                            </MenuItem>
                         </Select>
                     </FormControl>
                     <Box className={classes.addIngredients}>

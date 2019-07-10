@@ -67,6 +67,16 @@ const PreviewModal = props => {
                         readOnly: true
                     }}
                 />
+                <TextField
+                    id="category"
+                    label="Kategoria"
+                    fullWidth
+                    value={activeRecipe.category}
+                    margin="dense"
+                    InputProps={{
+                        readOnly: true
+                    }}
+                />
                 <Box className={classes.ingredientsList}>
                     {activeRecipe !== "" &&
                         activeRecipe.ingredients.map(ingredient => (

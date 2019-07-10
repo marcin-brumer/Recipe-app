@@ -137,81 +137,108 @@ const EditModal = props => {
                         }
                         margin="dense"
                     />
-                </form>
-                <FormControl
-                    variant="outlined"
-                    fullWidth
-                    required
-                    margin="dense"
-                >
-                    <InputLabel>Czas [min]</InputLabel>
-                    <Select
-                        value={activeRecipe.time}
-                        onChange={event =>
-                            setActiveRecipe({
-                                ...activeRecipe,
-                                time: event.target.value
-                            })
-                        }
-                        input={<OutlinedInput labelWidth={85} id="time" />}
-                    >
-                        <MenuItem value={15}>15</MenuItem>
-                        <MenuItem value={30}>30</MenuItem>
-                        <MenuItem value={45}>45</MenuItem>
-                        <MenuItem value={60}>60</MenuItem>
-                        <MenuItem value={75}>75</MenuItem>
-                        <MenuItem value={90}>90</MenuItem>
-                        <MenuItem value={105}>105</MenuItem>
-                        <MenuItem value={120}>120</MenuItem>
-                    </Select>
-                </FormControl>
-                <Box className={classes.addIngredients}>
-                    <TextField
-                        id="ingredients"
-                        label="Dodaj składnik"
+                    <FormControl
                         variant="outlined"
-                        value={ingredientName}
-                        onChange={changeIngredientName}
                         fullWidth
+                        required
                         margin="dense"
-                    />
-                    <Fab
-                        color="secondary"
-                        aria-label="Add"
-                        className={classes.fab}
-                        size="small"
-                        onClick={addIngredient}
                     >
-                        <AddIcon />
-                    </Fab>
-                </Box>
-                <Box className={classes.ingredientsList}>
-                    {activeRecipe !== "" &&
-                        activeRecipe.ingredients.map(ingredient => (
-                            <Chip
-                                key={ingredient}
-                                label={ingredient}
-                                className={classes.ingredient}
-                                onDelete={deleteIngredient(ingredient)}
-                                size="small"
-                            />
-                        ))}
-                </Box>
-                <Button
-                    type="submit"
-                    variant="contained"
-                    className={classes.button}
-                    onClick={saveChanges}
-                    disabled={loading}
-                >
-                    Zapisz
-                    {loading && (
-                        <CircularProgress
-                            size={24}
-                            className={classes.buttonProgress}
+                        <InputLabel>Czas [min]</InputLabel>
+                        <Select
+                            value={activeRecipe.time}
+                            onChange={event =>
+                                setActiveRecipe({
+                                    ...activeRecipe,
+                                    time: event.target.value
+                                })
+                            }
+                            input={<OutlinedInput labelWidth={85} id="time" />}
+                        >
+                            <MenuItem value={15}>15</MenuItem>
+                            <MenuItem value={30}>30</MenuItem>
+                            <MenuItem value={45}>45</MenuItem>
+                            <MenuItem value={60}>60</MenuItem>
+                            <MenuItem value={75}>75</MenuItem>
+                            <MenuItem value={90}>90</MenuItem>
+                            <MenuItem value={105}>105</MenuItem>
+                            <MenuItem value={120}>120</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl
+                        variant="outlined"
+                        fullWidth
+                        required
+                        margin="dense"
+                    >
+                        <InputLabel>Kategoria</InputLabel>
+                        <Select
+                            value={activeRecipe.category}
+                            onChange={event =>
+                                setActiveRecipe({
+                                    ...activeRecipe,
+                                    category: event.target.value
+                                })
+                            }
+                            input={
+                                <OutlinedInput labelWidth={80} id="category" />
+                            }
+                        >
+                            <MenuItem value={"Obiad"}>Obiad</MenuItem>
+                            <MenuItem value={"Sałatka"}>Sałatka</MenuItem>
+                            <MenuItem value={"Deser"}>Deser</MenuItem>
+                            <MenuItem value={"Dla dziecka"}>
+                                Dla dziecka
+                            </MenuItem>
+                        </Select>
+                    </FormControl>
+                    <Box className={classes.addIngredients}>
+                        <TextField
+                            id="ingredients"
+                            label="Dodaj składnik"
+                            variant="outlined"
+                            value={ingredientName}
+                            onChange={changeIngredientName}
+                            fullWidth
+                            margin="dense"
                         />
-                    )}
-                </Button>
+                        <Fab
+                            color="secondary"
+                            aria-label="Add"
+                            className={classes.fab}
+                            size="small"
+                            onClick={addIngredient}
+                        >
+                            <AddIcon />
+                        </Fab>
+                    </Box>
+                    <Box className={classes.ingredientsList}>
+                        {activeRecipe !== "" &&
+                            activeRecipe.ingredients.map(ingredient => (
+                                <Chip
+                                    key={ingredient}
+                                    label={ingredient}
+                                    className={classes.ingredient}
+                                    onDelete={deleteIngredient(ingredient)}
+                                    size="small"
+                                />
+                            ))}
+                    </Box>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        className={classes.button}
+                        onClick={saveChanges}
+                        disabled={loading}
+                    >
+                        Zapisz
+                        {loading && (
+                            <CircularProgress
+                                size={24}
+                                className={classes.buttonProgress}
+                            />
+                        )}
+                    </Button>
+                </form>
             </DialogContent>
         </Dialog>
     );
