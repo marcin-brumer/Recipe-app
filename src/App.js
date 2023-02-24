@@ -21,6 +21,8 @@ function App() {
         setValue(newValue);
     };
 
+    console.log('test');
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
